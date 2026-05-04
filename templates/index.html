@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Список дел</title>
+    <style>
+        /* Задание 2: Светло-серый фон страницы и синий заголовок */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            color: blue;
+        }
+        h2 { color: #333; }
+
+        ul { list-style: none; padding: 0; }
+        li {
+            margin: 10px 0;
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .task-content {
+            display: flex;
+            flex-direction: column;
+        }
+        .task-date {
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 5px;
+        }
+        .delete-btn {
+            color: white;
+            background-color: #e74c3c;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+        }
+        .clear-btn {
+            display: inline-block;
+            margin-top: 20px;
+            color: white;
+            background-color: #555;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Мои задачи</h1>
+
+    <ul>
+        {% for task in tasks %}
+        <li>
+            <div class="task-content">
+                <strong>{{ task.text }}</strong>
+                <span class="task-date">Добавлено: {{ task.date }}</span>
+            </div>
+            <a class="delete-btn" href="/delete/{{ loop.index0 }}">Удалить</a>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <h2>Добавить задачу</h2>
+    <form method="POST" action="/add">
+        <input type="text" name="task" placeholder="Новая задача" required style="padding: 5px;">
+        <button type="submit" style="padding: 5px 10px;">Добавить</button>
+    </form>
+
+    <a href="/clear" class="clear-btn">Очистить всё</a>
+
+</body>
+</html>
