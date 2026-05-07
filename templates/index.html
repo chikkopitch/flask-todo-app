@@ -1,79 +1,84 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Список дел</title>
+    <title>Список задач</title>
     <style>
-        /* Задание 2: Светло-серый фон страницы и синий заголовок */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-            background-color: #f0f0f0;
+        body { font-family: Arial; margin: 40px; }
+        input, button { padding: 8px; margin: 5px; }
+        li { margin: 10px 0; }
+        a { margin-left: 8px; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .done-text { text-decoration: line-through; color: #888; }
+        .counter { color: #555; margin-bottom: 16px; }
+        .filters { margin-bottom: 16px; }
+        .filters a { 
+            padding: 4px 10px; 
+            border: 1px solid #ccc; 
+            border-radius: 4px; 
+            margin-right: 6px;
         }
-        h1 {
-            color: blue;
-        }
-        h2 { color: #333; }
-
-        ul { list-style: none; padding: 0; }
-        li {
-            margin: 10px 0;
-            background: white;
-            padding: 15px;
-            border-radius: 5px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .task-content {
-            display: flex;
-            flex-direction: column;
-        }
-        .task-date {
-            font-size: 0.8em;
-            color: #888;
-            margin-top: 5px;
-        }
-        .delete-btn {
+        .filters a.active-filter {
+            background-color: #4CAF50;
             color: white;
-            background-color: #e74c3c;
-            text-decoration: none;
-            padding: 5px 10px;
-            border-radius: 3px;
+            border-color: #4CAF50;
         }
-        .clear-btn {
-            display: inline-block;
-            margin-top: 20px;
-            color: white;
-            background-color: #555;
-            text-decoration: none;
-            padding: 10px 15px;
-            border-radius: 3px;
+        .bulk-actions { margin: 12px 0; }
+        .bulk-actions a {
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-right: 6px;
+            background: #f5f5f5;
         }
     </style>
 </head>
 <body>
-    <h1>Мои задачи</h1>
+    <h1>Список задач</h1>
 
+    <!-- Счётчик невыполненных задач -->
+    <p class="counter">Осталось задач: {{ tasks|selectattr('done', 'equalto', False)|list|length }}</p>
+
+    <!-- Форма добавления -->
+    <form method="POST" action="/add">
+        <input type="text" name="task" placeholder="Новая задача" required>
+        <button type="submit">Добавить</button>
+    </form>
+
+    <!-- Фильтры -->
+    <div class="filters">
+        <a href="/" class="{{ 'active-filter' if filter == 'all' else '' }}">Все</a>
+        <a href="/active" class="{{ 'active-filter' if filter == 'active' else '' }}">Активные</a>
+        <a href="/completed" class="{{ 'active-filter' if filter == 'completed' else '' }}">Выполненные</a>
+    </div>
+
+    <!-- Массовые действия -->
+    <div class="bulk-actions">
+        <a href="/complete_all">✅ Выполнить все</a>
+        <a href="/reset_all">↩️ Отменить все</a>
+    </div>
+
+    <!-- Список задач -->
     <ul>
         {% for task in tasks %}
         <li>
-            <div class="task-content">
-                <strong>{{ task.text }}</strong>
-                <span class="task-date">Добавлено: {{ task.date }}</span>
-            </div>
-            <a class="delete-btn" href="/delete/{{ loop.index0 }}">Удалить</a>
+            {% if task.done %}
+            <!-- Если задача выполнена — выводим текст зачёркнутым -->
+                <s class="done-text">{{ task.text }}</s>
+            {% else %}
+            <!-- Иначе — обычный текст -->
+                {{ task.text }}
+            {% endif %}
+            <!-- Конец условного оператора -->
+
+            — <small>{{ task.date }}</small>
+
+            <!-- loop.index0 — текущий индекс задачи в цикле (0, 1, 2...) -->
+            <a href="/toggle/{{ loop.index0 }}">✅ Выполнено</a>
+            <a href="/edit/{{ loop.index0 }}">✏️ Редактировать</a>
+            <a href="/delete/{{ loop.index0 }}">🗑️ Удалить</a>
         </li>
         {% endfor %}
+        <!-- Конец цикла перебора задач -->
     </ul>
-
-    <h2>Добавить задачу</h2>
-    <form method="POST" action="/add">
-        <input type="text" name="task" placeholder="Новая задача" required style="padding: 5px;">
-        <button type="submit" style="padding: 5px 10px;">Добавить</button>
-    </form>
-
-    <a href="/clear" class="clear-btn">Очистить всё</a>
-
 </body>
 </html>
