@@ -1,1 +1,32 @@
-[]
+[
+  {
+    "text": "Артем",
+    "date": "2026-05-22",
+    "done": false,
+    "priority": "Low"
+  },
+  {
+    "text": "Щовель",
+    "date": "2026-05-22",
+    "done": false,
+    "priority": "Medium"
+  },
+  {
+    "text": "авав",
+    "date": "2026-05-22",
+    "done": false,
+    "priority": "Medium"
+  },
+  {
+    "text": "авав",
+    "date": "2026-05-22",
+    "done": false,
+    "priority": "Medium"
+  },
+  {
+    "text": "Привет",
+    "date": "2026-05-22",
+    "done": false,
+    "priority": "High"
+  }
+]

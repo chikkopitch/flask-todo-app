@@ -36,11 +36,16 @@
     <h1>Список задач</h1>
 
     <!-- Счётчик невыполненных задач -->
-    <p class="counter">Осталось задач: {{ tasks|selectattr('done', 'equalto', False)|list|length }}</p>
+    <p class="counter">Осталось задач: {{ remaining }}</p>
 
     <!-- Форма добавления -->
     <form method="POST" action="/add">
         <input type="text" name="task" placeholder="Новая задача" required>
+        <select name="priority">
+            {% for priority in priorities %}
+                <option value="{{ priority }}" {% if priority == 'Medium' %}selected{% endif %}>{{ priority }}</option>
+            {% endfor %}
+        </select>
         <button type="submit">Добавить</button>
     </form>
 
@@ -49,6 +54,7 @@
         <a href="/" class="{{ 'active-filter' if filter == 'all' else '' }}">Все</a>
         <a href="/active" class="{{ 'active-filter' if filter == 'active' else '' }}">Активные</a>
         <a href="/completed" class="{{ 'active-filter' if filter == 'completed' else '' }}">Выполненные</a>
+        <a href="/priority" class="{{ 'active-filter' if filter == 'priority' else '' }}">По приоритету</a>
     </div>
 
     <!-- Массовые действия -->
@@ -59,26 +65,22 @@
 
     <!-- Список задач -->
     <ul>
-        {% for task in tasks %}
+        {% for item in tasks %}
         <li>
-            {% if task.done %}
-            <!-- Если задача выполнена — выводим текст зачёркнутым -->
-                <s class="done-text">{{ task.text }}</s>
+            {% if item.task.done %}
+                <s class="done-text">{{ item.task.text }}</s>
             {% else %}
-            <!-- Иначе — обычный текст -->
-                {{ task.text }}
+                {{ item.task.text }}
             {% endif %}
-            <!-- Конец условного оператора -->
 
-            — <small>{{ task.date }}</small>
+            — <small>{{ item.task.date }}</small>
+            — <strong>{{ item.task.priority }}</strong>
 
-            <!-- loop.index0 — текущий индекс задачи в цикле (0, 1, 2...) -->
-            <a href="/toggle/{{ loop.index0 }}">✅ Выполнено</a>
-            <a href="/edit/{{ loop.index0 }}">✏️ Редактировать</a>
-            <a href="/delete/{{ loop.index0 }}">🗑️ Удалить</a>
+            <a href="/toggle/{{ item.id }}">✅ Выполнено</a>
+            <a href="/edit/{{ item.id }}">✏️ Редактировать</a>
+            <a href="/delete/{{ item.id }}">🗑️ Удалить</a>
         </li>
         {% endfor %}
-        <!-- Конец цикла перебора задач -->
     </ul>
 </body>
 </html>
