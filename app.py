@@ -6,8 +6,9 @@ from datetime import date
 app = Flask(__name__)
 
 TASKS_FILE = 'tasks.json'
-PRIORITY_CHOICES = ['High', 'Medium', 'Low']
-PRIORITY_ORDER = {'High': 3, 'Medium': 2, 'Low': 1}
+PRIORITY_CHOICES = ['высокий', 'средний', 'низкий']
+PRIORITY_ORDER = {'высокий': 3, 'средний': 2, 'низкий': 1}
+PRIORITY_EMOJIS = {'высокий': '🔴', 'средний': '🟡', 'низкий': '🟢'}
 
 
 def load_tasks():
@@ -24,18 +25,29 @@ def save_tasks(tasks):
 
 def normalize_task(task):
     if 'priority' not in task or task.get('priority') not in PRIORITY_ORDER:
-        task['priority'] = 'Medium'
+        task['priority'] = 'средний'
     if 'done' not in task:
         task['done'] = False
     return task
 
 
-def prepare_tasks(filtered):
-    return [{'id': idx, 'task': task} for idx, task in enumerate(filtered)]
+def prepare_tasks(task_items):
+    return [{'id': idx, 'task': task} for idx, task in task_items]
 
 
-def sort_by_priority(task_list):
-    return sorted(task_list, key=lambda t: PRIORITY_ORDER.get(t.get('priority', 'Medium'), 2), reverse=True)
+def sort_by_priority(task_items):
+    return sorted(
+        task_items,
+        key=lambda item: PRIORITY_ORDER.get(item[1].get('priority', 'средний'), 2),
+        reverse=True,
+    )
+
+
+def get_priority_counts():
+    return {
+        priority: sum(1 for task in tasks if task.get('priority') == priority)
+        for priority in PRIORITY_CHOICES
+    }
 
 
 tasks = load_tasks()
@@ -48,63 +60,72 @@ save_tasks(tasks)
 def index():
     return render_template(
         'index.html',
-        tasks=prepare_tasks(tasks),
+        tasks=prepare_tasks(enumerate(tasks)),
         filter='all',
-        sort='none',
         remaining=sum(1 for task in tasks if not task.get('done', False)),
         priorities=PRIORITY_CHOICES,
+        priority_counts=get_priority_counts(),
+        priority_emojis=PRIORITY_EMOJIS,
     )
 
 
 # ── Активные задачи ───────────────────────────────────────────────────────────
 @app.route('/active')
 def active_tasks():
-    visible = [task for task in tasks if not task.get('done', False)]
+    visible = ((idx, task) for idx, task in enumerate(tasks) if not task.get('done', False))
     return render_template(
         'index.html',
         tasks=prepare_tasks(visible),
         filter='active',
-        sort='none',
-        remaining=len(visible),
+        remaining=sum(1 for task in tasks if not task.get('done', False)),
         priorities=PRIORITY_CHOICES,
+        priority_counts=get_priority_counts(),
+        priority_emojis=PRIORITY_EMOJIS,
     )
 
 
 # ── Выполненные задачи ────────────────────────────────────────────────────────
 @app.route('/completed')
 def completed_tasks():
-    visible = [task for task in tasks if task.get('done', False)]
+    visible = ((idx, task) for idx, task in enumerate(tasks) if task.get('done', False))
     return render_template(
         'index.html',
         tasks=prepare_tasks(visible),
         filter='completed',
-        sort='none',
-        remaining=len(visible),
+        remaining=sum(1 for task in tasks if not task.get('done', False)),
         priorities=PRIORITY_CHOICES,
+        priority_counts=get_priority_counts(),
+        priority_emojis=PRIORITY_EMOJIS,
     )
 
 
 # ── Сортировка по приоритету ────────────────────────────────────────────────────
-@app.route('/priority')
-def priority_tasks():
-    visible = sort_by_priority(tasks)
+@app.route('/by_priority')
+def by_priority_tasks():
+    visible = sort_by_priority(enumerate(tasks))
     return render_template(
         'index.html',
         tasks=prepare_tasks(visible),
-        filter='priority',
-        sort='priority',
-        remaining=sum(1 for task in visible if not task.get('done', False)),
+        filter='by_priority',
+        remaining=sum(1 for task in tasks if not task.get('done', False)),
         priorities=PRIORITY_CHOICES,
+        priority_counts=get_priority_counts(),
+        priority_emojis=PRIORITY_EMOJIS,
     )
+
+
+@app.route('/priority')
+def priority_redirect():
+    return redirect('/by_priority')
 
 
 # ── Добавление задачи ─────────────────────────────────────────────────────────
 @app.route('/add', methods=['POST'])
 def add_task():
     new_task = request.form.get('task', '').strip()
-    priority = request.form.get('priority', 'Medium')
+    priority = request.form.get('priority', 'средний')
     if priority not in PRIORITY_ORDER:
-        priority = 'Medium'
+        priority = 'средний'
 
     if new_task:
         today = date.today().strftime('%Y-%m-%d')
@@ -130,17 +151,27 @@ def edit_task(task_id):
 
     if request.method == 'POST':
         new_text = request.form.get('task', '').strip()
-        new_priority = request.form.get('priority', 'Medium')
+        new_priority = request.form.get('priority', 'средний')
         if new_priority not in PRIORITY_ORDER:
-            new_priority = 'Medium'
+            new_priority = 'средний'
 
         if new_text == '':
-            return render_template('edit.html', task=tasks[task_id], message='Текст не может быть пустым!', priorities=PRIORITY_CHOICES)
+            return render_template(
+                'edit.html',
+                task=tasks[task_id],
+                message='Текст не может быть пустым!',
+                priorities=PRIORITY_CHOICES,
+            )
 
         old_text = tasks[task_id].get('text', '')
-        old_priority = tasks[task_id].get('priority', 'Medium')
+        old_priority = tasks[task_id].get('priority', 'средний')
         if new_text == old_text and new_priority == old_priority:
-            return render_template('edit.html', task=tasks[task_id], message='Ничего не изменено', priorities=PRIORITY_CHOICES)
+            return render_template(
+                'edit.html',
+                task=tasks[task_id],
+                message='Ничего не изменено',
+                priorities=PRIORITY_CHOICES,
+            )
 
         tasks[task_id]['text'] = new_text
         tasks[task_id]['priority'] = new_priority

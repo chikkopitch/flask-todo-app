@@ -4,7 +4,7 @@
     <title>Редактировать задачу</title>
     <style>
         body { font-family: Arial; margin: 40px; }
-        input, button { padding: 8px; margin: 5px; }
+        input, select, button { padding: 8px; margin: 5px; }
         .error { color: red; }
         .message { color: orange; }
     </style>
@@ -17,13 +17,18 @@
     {% endif %}
 
     <form method="POST">
-        <input type="text" name="task" value="{{ task.text }}" required>
-        <label>Приоритет:</label>
-        <select name="priority">
-            {% for priority in priorities %}
-                <option value="{{ priority }}" {% if priority == task.priority %}selected{% endif %}>{{ priority }}</option>
-            {% endfor %}
-        </select>
+        <div>
+            <label>Текст задачи:</label><br>
+            <input type="text" name="task" value="{{ task.text }}" required>
+        </div>
+        <div>
+            <label>Приоритет:</label><br>
+            <select name="priority">
+                {% for priority in priorities %}
+                    <option value="{{ priority }}" {% if priority == task.priority %}selected{% endif %}>{{ priority }}</option>
+                {% endfor %}
+            </select>
+        </div>
         <button type="submit">Сохранить</button>
         <a href="/">Отмена</a>
     </form>

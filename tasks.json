@@ -3,30 +3,36 @@
     "text": "Артем",
     "date": "2026-05-22",
     "done": false,
-    "priority": "Low"
+    "priority": "средний"
   },
   {
     "text": "Щовель",
     "date": "2026-05-22",
     "done": false,
-    "priority": "Medium"
+    "priority": "средний"
   },
   {
     "text": "авав",
     "date": "2026-05-22",
     "done": false,
-    "priority": "Medium"
+    "priority": "средний"
   },
   {
     "text": "авав",
     "date": "2026-05-22",
     "done": false,
-    "priority": "Medium"
+    "priority": "средний"
   },
   {
     "text": "Привет",
     "date": "2026-05-22",
     "done": false,
-    "priority": "High"
+    "priority": "средний"
+  },
+  {
+    "text": "Щовель",
+    "date": "2026-05-22",
+    "done": false,
+    "priority": "высокий"
   }
 ]

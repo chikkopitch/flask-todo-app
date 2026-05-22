@@ -4,7 +4,7 @@
     <title>Список задач</title>
     <style>
         body { font-family: Arial; margin: 40px; }
-        input, button { padding: 8px; margin: 5px; }
+        input, select, button { padding: 8px; margin: 5px; }
         li { margin: 10px 0; }
         a { margin-left: 8px; text-decoration: none; }
         a:hover { text-decoration: underline; }
@@ -30,6 +30,8 @@
             margin-right: 6px;
             background: #f5f5f5;
         }
+        .priority-counts { margin-bottom: 16px; }
+        .priority-counts span { display: inline-block; margin-right: 16px; }
     </style>
 </head>
 <body>
@@ -38,12 +40,19 @@
     <!-- Счётчик невыполненных задач -->
     <p class="counter">Осталось задач: {{ remaining }}</p>
 
+    <!-- Количество задач по приоритетам -->
+    <div class="priority-counts">
+        <span>🔴 высокий: {{ priority_counts['высокий'] }}</span>
+        <span>🟡 средний: {{ priority_counts['средний'] }}</span>
+        <span>🟢 низкий: {{ priority_counts['низкий'] }}</span>
+    </div>
+
     <!-- Форма добавления -->
     <form method="POST" action="/add">
         <input type="text" name="task" placeholder="Новая задача" required>
         <select name="priority">
             {% for priority in priorities %}
-                <option value="{{ priority }}" {% if priority == 'Medium' %}selected{% endif %}>{{ priority }}</option>
+                <option value="{{ priority }}" {% if priority == 'средний' %}selected{% endif %}>{{ priority }}</option>
             {% endfor %}
         </select>
         <button type="submit">Добавить</button>
@@ -54,7 +63,7 @@
         <a href="/" class="{{ 'active-filter' if filter == 'all' else '' }}">Все</a>
         <a href="/active" class="{{ 'active-filter' if filter == 'active' else '' }}">Активные</a>
         <a href="/completed" class="{{ 'active-filter' if filter == 'completed' else '' }}">Выполненные</a>
-        <a href="/priority" class="{{ 'active-filter' if filter == 'priority' else '' }}">По приоритету</a>
+        <a href="/by_priority" class="{{ 'active-filter' if filter == 'by_priority' else '' }}">По приоритету</a>
     </div>
 
     <!-- Массовые действия -->
@@ -74,7 +83,8 @@
             {% endif %}
 
             — <small>{{ item.task.date }}</small>
-            — <strong>{{ item.task.priority }}</strong>
+            — <small>{{ 'Выполнено' if item.task.done else 'Активно' }}</small>
+            — <strong>{{ priority_emojis[item.task.priority] }} {{ item.task.priority }}</strong>
 
             <a href="/toggle/{{ item.id }}">✅ Выполнено</a>
             <a href="/edit/{{ item.id }}">✏️ Редактировать</a>
